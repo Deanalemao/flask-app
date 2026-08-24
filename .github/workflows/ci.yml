@@ -28,3 +28,13 @@ jobs:
 
       - name: run basic check
         run: python -m py_compile app.py
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+
+      - name: build docker images
+        run: docker build -t flask-devops-app:${{ github.sha }} .
