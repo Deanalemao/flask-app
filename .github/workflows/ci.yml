@@ -27,4 +27,4 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: run basic check
-        run: python -m py_complie app.py
+        run: python -m py_compile app.py
