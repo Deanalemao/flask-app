@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}About | Flask Task Manager{% endblock %}
+{% block content %}
+<section class="hero">
+    <p class="eyebrow">ABOUT THIS PROJECT</p>
+    <h1>Flask + PostgreSQL.</h1>
+    <p class="subtitle">A small CRUD app for practising Docker, database containers, volumes, and Compose.</p>
+</section>
+<section class="panel">
+    <h2>Included features</h2>
+    <ul class="feature-list">
+        <li>Create, complete, reactivate and delete tasks</li>
+        <li>Persist data in PostgreSQL</li>
+        <li>Database-aware health endpoint at <code>/health</code></li>
+    </ul>
+</section>
+{% endblock %}

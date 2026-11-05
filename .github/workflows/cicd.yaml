@@ -1,0 +1,95 @@
+name: Flask App deployment 
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+      
+      - name: set-up python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: test python
+        run: python -m py_compile app.py
+  
+  push:
+    runs-on: ubuntu-latest
+    needs: build
+
+    if: github.event_name == "push"
+    steps:
+      
+      - name: checkout repository
+        uses: actions/checkout@v4
+
+      - name: login to docker 
+        uses: docker/login-action@v3
+
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: install docker buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: build and push flask
+        uses: docker/build-push-action@v6
+
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME}}/flask-task:${{ github.sha }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: push
+
+    if: github.event_name == "push"
+
+    steps:
+      - name: ssh into ec2
+        uses: appleboy/ssh-action@v1.0.3
+
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+
+          script: |
+            cd ~/flask-app
+
+            git fetch origin
+            git reset --hard origin/main
+
+            export IMAGE_TAG=${{ github.sha }}
+
+            echo "IMAGE_TAG=$IMAGE_TAG"
+
+            docker compose config | grep image
+
+            docker compose pull
+
+            docker compose up -d --remove-orphans
+      
+            docker ps --format "table {{.Names}}\t{{.Image}}"
+
+
+
+    

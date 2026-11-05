@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Tasks | Flask Task Manager{% endblock %}
+{% block content %}
+<section class="hero">
+    <p class="eyebrow">YOUR WORKSPACE</p>
+    <h1>Stay on top of your tasks.</h1>
+    <p class="subtitle">Add tasks, track progress, and keep everything organized.</p>
+</section>
+<section class="panel">
+    <h2>Add a task</h2>
+    <form action="{{ url_for('add_task') }}" method="POST" class="task-form">
+        <label for="title">Task title</label>
+        <input id="title" name="title" type="text" placeholder="e.g. Build a Docker image" required maxlength="120">
+        <label for="description">Description <span>(optional)</span></label>
+        <textarea id="description" name="description" rows="3" placeholder="Add a few details..."></textarea>
+        <button type="submit" class="button primary">Add task</button>
+    </form>
+</section>
+<section class="task-section">
+    <div class="section-heading"><h2>Your tasks</h2><span class="count">{{ tasks|length }} total</span></div>
+    {% if tasks %}
+        <div class="task-list">
+            {% for task in tasks %}
+                <article class="task-card {% if task.completed %}completed{% endif %}">
+                    <div class="task-content">
+                        <h3>{{ task.title }}</h3>
+                        {% if task.description %}<p>{{ task.description }}</p>{% endif %}
+                        <small>Created: {{ task.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                    </div>
+                    <div class="task-actions">
+                        <form action="{{ url_for('toggle_task', task_id=task.id) }}" method="POST">
+                            <button class="button secondary" type="submit">{% if task.completed %}Mark active{% else %}Complete{% endif %}</button>
+                        </form>
+                        <form action="{{ url_for('delete_task', task_id=task.id) }}" method="POST" onsubmit="return confirm('Delete this task?');">
+                            <button class="button danger" type="submit">Delete</button>
+                        </form>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state"><h3>No tasks yet</h3><p>Add your first task using the form above.</p></div>
+    {% endif %}
+</section>
+{% endblock %}
