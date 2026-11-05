@@ -1,7 +1,7 @@
 services:
   flask:
-    build: .
     image: deanalemao/flask-task:${IMAGE_TAG}
+    expose:
       - "5000"
     env_file:
       - ./.env.flask
